@@ -9,7 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MaxAbsScaler
 import random
 
-sims = 10000000
+sims = 500000
 
 gravitationalConstant = 6.67 * (10 ** -11)
 airDensity = 1.225 # [kg/m^3] @ sea level  
@@ -162,25 +162,32 @@ def neuralNetwork(X, Y):
                     metrics=[tf.keras.metrics.BinaryAccuracy(name='accuracy')])
     history = model.fit(X, Y, epochs=1000, verbose=1)  
 
+def save(sim, dataset):
+    dataset = np.delete(dataset, 0, axis=0) # remove row of zeros
+    columnNames = ["planetMass", "planetRadius", "orbitRadius", "velocity", "requiredVelcity", "thrust"]
+
+    dataset = pd.DataFrame(dataset, columns=columnNames) # convert numpy array into pandas dataframe
+    dataset.to_csv(r'C:\Users\josha\CSV\export_dataframe%s.csv' % sim)
+
 def main():
     dataset = np.array([[0, 0, 0, 0, 0, 0]]) # starting data
-    for sim in range(sims):
-        planet = createPlanet()
+    for epochsim in range(10000):
+        dataset = np.array([[0, 0, 0, 0, 0, 0]]) # starting data
+        for sim in range(sims):
+            planet = createPlanet()
 
-        thrust = findThrust()
-        requiredVelocity = orbitalVelocity(planet)
-        velocity = flightModel(planet, thrust, requiredVelocity)
-        result = evaluateFlight(velocity, requiredVelocity)
-        if result == 1:
-            dataset = storeData(dataset, planet, thrust, velocity, requiredVelocity)
-        
-        if sim % 10000 == 0:
-            print("Sim # %i   Successes: %i" % (sim, dataset.shape[0]))
-            leave = input("enter 'Y' to quit training early: ")
-            if leave == 'Y':
-                prepareData(dataset)
-    # Use dataset for Neural Network Training
-    X, Y = prepareData(dataset)
-    neuralNetwork(X.tolist(), Y.to_list())
+            thrust = findThrust()
+            requiredVelocity = orbitalVelocity(planet)
+            velocity = flightModel(planet, thrust, requiredVelocity)
+            result = evaluateFlight(velocity, requiredVelocity)
+            if result == 1:
+                dataset = storeData(dataset, planet, thrust, velocity, requiredVelocity)
+            
+            if sim % 10000 == 0:
+                print("Sim # %i   Successes: %i" % (sim, dataset.shape[0]))
+        # Use dataset for Neural Network Training
+        save(epochsim, dataset)
+        #X, Y = prepareData(dataset)
+        #neuralNetwork(X.tolist(), Y.to_list())
 
 main()
