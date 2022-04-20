@@ -169,6 +169,11 @@ def save(sim, dataset):
     dataset = pd.DataFrame(dataset, columns=columnNames) # convert numpy array into pandas dataframe
     dataset.to_csv(r'C:\Users\josha\CSV\export_dataframe%s.csv' % sim)
 
+def importCSV():
+    fileCount = 100
+    for file in range(fileCount):
+        url = 'https://github.com/jrbsn/Rocket-Orbit/blob/main/export_dataframe%i.csv' % file
+    
 def main():
     dataset = np.array([[0, 0, 0, 0, 0, 0]]) # starting data
     for epochsim in range(10000):
